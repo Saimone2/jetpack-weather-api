@@ -12,8 +12,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -25,9 +23,9 @@ import androidx.compose.ui.unit.dp
 import com.android.volley.Request
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
+import com.saimone.jetpack_weather_app.screens.MainScreen
 import com.saimone.jetpack_weather_app.ui.theme.JetpackweatherappTheme
 import org.json.JSONObject
-
 
 const val API_KEY = "15b2a15e17c554f4925a66f101302ca3"
 
@@ -36,12 +34,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             JetpackweatherappTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    Greeting("Kyiv", this)
-                }
+                MainScreen()
             }
         }
     }
@@ -55,18 +48,24 @@ fun Greeting(city: String, context: Context) {
 
     Column(modifier = Modifier.fillMaxSize()) {
         Box(
-            modifier = Modifier.fillMaxHeight(0.5f).fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxHeight(0.5f)
+                .fillMaxWidth(),
             contentAlignment = Alignment.Center
         ) {
             Text(text = "Temperature in $city: ${state.value} °C")
         }
         Box(
-            modifier = Modifier.fillMaxHeight().fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxHeight()
+                .fillMaxWidth(),
             contentAlignment = Alignment.BottomCenter,
         ) {
             Button(onClick = {
                 getResult(city, state, context)
-            }, modifier = Modifier.padding(5.dp).fillMaxWidth()) {
+            }, modifier = Modifier
+                .padding(5.dp)
+                .fillMaxWidth()) {
                 Text(text = "Refresh")
             }
         }
