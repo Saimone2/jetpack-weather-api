@@ -6,39 +6,38 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
 import com.android.volley.Request
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
+import com.saimone.jetpack_weather_app.data.WeatherModel
 import com.saimone.jetpack_weather_app.screens.MainCard
 import com.saimone.jetpack_weather_app.screens.TabLayout
 import com.saimone.jetpack_weather_app.ui.theme.JetpackweatherappTheme
 import org.json.JSONObject
 
-const val API_KEY = "15b2a15e17c554f4925a66f101302ca3"
+const val API_KEY = "a624625638244d37b25103525232208"
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             JetpackweatherappTheme {
+                val daysList = remember {
+                    mutableStateOf(listOf<WeatherModel>())
+                }
+                val currentDay = remember {
+                    mutableStateOf(WeatherModel("", "", "0.0", "", "", "0.0", "0.0", ""))
+                }
+                getData("Kiev", this, daysList, currentDay)
                 Image(
                     painter = painterResource(id = R.drawable.sky),
                     contentDescription = "background",
@@ -48,66 +47,60 @@ class MainActivity : ComponentActivity() {
                     contentScale = ContentScale.FillBounds
                 )
                 Column {
-                    MainCard()
-                    TabLayout()
+                    MainCard(currentDay)
+                    TabLayout(daysList)
                 }
             }
         }
     }
 }
 
-@Composable
-fun Greeting(city: String, context: Context) {
-    val state = remember {
-        mutableStateOf("Unknown")
-    }
-
-    Column(modifier = Modifier.fillMaxSize()) {
-        Box(
-            modifier = Modifier
-                .fillMaxHeight(0.5f)
-                .fillMaxWidth(),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(text = "Temperature in $city: ${state.value} °C")
-        }
-        Box(
-            modifier = Modifier
-                .fillMaxHeight()
-                .fillMaxWidth(),
-            contentAlignment = Alignment.BottomCenter,
-        ) {
-            Button(onClick = {
-                getResult(city, state, context)
-            }, modifier = Modifier
-                .padding(5.dp)
-                .fillMaxWidth()) {
-                Text(text = "Refresh")
-            }
-        }
-    }
-}
-private fun getResult(city: String, state: MutableState<String>, context: Context) {
-    val url = "https://api.openweathermap.org/data/2.5/forecast?id=524901&appid=$API_KEY&q=$city"
-    val queue = Volley.newRequestQueue(context)
-    val stringRequest = StringRequest(
+private fun getData(city: String, context: Context, daysList: MutableState<List<WeatherModel>>, currentDay: MutableState<WeatherModel>) {
+    val url =
+        "https://api.weatherapi.com/v1/forecast.json?key=${API_KEY}&q=${city}&days=3&aqi=no&alerts=no"
+    val query = Volley.newRequestQueue(context)
+    val request = StringRequest(
         Request.Method.GET,
         url,
         { response ->
-            val obj = JSONObject(response)
-            val forecastList = obj.getJSONArray("list")
-
-            val forecast = forecastList.getJSONObject(0)
-            val temperature = forecast.getJSONObject("main").getDouble("temp")
-            state.value = (temperature - 273.15).round(1).toString()
+            val list = getWeatherByDays(response)
+            currentDay.value = list[0]
+            daysList.value = list
+            Log.d("MyLog", daysList.value.toString())
         },
-        { error -> Log.d("MyLog", "Error: $error")}
+        { error ->
+            Log.d("MyLog", "Error: $error")
+        }
     )
-    queue.add(stringRequest)
+    query.add(request)
 }
 
-private fun Double.round(decimals: Int): Double {
-    var multiplier = 1.0
-    repeat(decimals) { multiplier *= 10 }
-    return kotlin.math.round(this * multiplier) / multiplier
+private fun getWeatherByDays(response: String): List<WeatherModel> {
+    if (response.isEmpty()) {
+        return listOf()
+    }
+    val mainObject = JSONObject(response)
+    val city = mainObject.getJSONObject("location").getString("name")
+    val days = mainObject.getJSONObject("forecast").getJSONArray("forecastday")
+    val list = ArrayList<WeatherModel>()
+    for (i in 0 until days.length()) {
+        val item = days[i] as JSONObject
+
+        val model = WeatherModel(
+            city,
+            item.getString("date"),
+            "",
+            item.getJSONObject("day").getJSONObject("condition").getString("text"),
+            item.getJSONObject("day").getJSONObject("condition").getString("icon"),
+            item.getJSONObject("day").getString("maxtemp_c"),
+            item.getJSONObject("day").getString("mintemp_c"),
+            item.getJSONArray("hour").toString()
+        )
+        list.add(model)
+    }
+    list[0] = list[0].copy(
+        time = mainObject.getJSONObject("current").getString("last_updated"),
+        currentTemp = mainObject.getJSONObject("current").getString("temp_c")
+    )
+    return list
 }

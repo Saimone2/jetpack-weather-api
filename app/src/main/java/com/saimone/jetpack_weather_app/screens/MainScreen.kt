@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -21,6 +22,7 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,11 +37,12 @@ import coil.compose.AsyncImage
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import com.saimone.jetpack_weather_app.R
+import com.saimone.jetpack_weather_app.data.WeatherModel
 import com.saimone.jetpack_weather_app.ui.theme.TransparentBlue
 import kotlinx.coroutines.launch
 
 @Composable
-fun MainCard() {
+fun MainCard(currentDay: MutableState<WeatherModel>) {
     Column(
         modifier = Modifier.padding(5.dp)
     ) {
@@ -60,12 +63,12 @@ fun MainCard() {
                 ) {
                     Text(
                         modifier = Modifier.padding(top = 8.dp, start = 8.dp),
-                        text = "20 June 2023 13:00",
+                        text = currentDay.value.time,
                         style = TextStyle(fontSize = 15.sp),
                         color = Color.White
                     )
                     AsyncImage(
-                        model = "https://cdn.weatherapi.com/weather/64x64/day/113.png",
+                        model = "https:" + currentDay.value.icon,
                         contentDescription = "image1",
                         modifier = Modifier
                             .size(35.dp)
@@ -73,13 +76,19 @@ fun MainCard() {
                     )
                 }
                 Text(
-                    text = "Madrid", style = TextStyle(fontSize = 24.sp), color = Color.White
+                    text = currentDay.value.city,
+                    style = TextStyle(fontSize = 24.sp),
+                    color = Color.White
                 )
                 Text(
-                    text = "23°С", style = TextStyle(fontSize = 65.sp), color = Color.White
+                    text = "${currentDay.value.currentTemp.toFloat().toInt()}°С",
+                    style = TextStyle(fontSize = 65.sp),
+                    color = Color.White
                 )
                 Text(
-                    text = "Sunny", style = TextStyle(fontSize = 16.sp), color = Color.White
+                    text = currentDay.value.condition,
+                    style = TextStyle(fontSize = 16.sp),
+                    color = Color.White
                 )
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -95,7 +104,11 @@ fun MainCard() {
                         )
                     }
                     Text(
-                        text = "23°С/12°С", style = TextStyle(fontSize = 16.sp), color = Color.White
+                        text = "${
+                            currentDay.value.maxTemp.toFloat().toInt()
+                        }°С / ${currentDay.value.minTemp.toFloat().toInt()}°С",
+                        style = TextStyle(fontSize = 16.sp),
+                        color = Color.White
                     )
                     IconButton(onClick = {
 
@@ -113,7 +126,7 @@ fun MainCard() {
 }
 
 @Composable
-fun TabLayout() {
+fun TabLayout(daysList: MutableState<List<WeatherModel>>) {
     val tabList = listOf("HOURS", "DAYS")
     val pagerState = rememberPagerState()
     val coroutineScope = rememberCoroutineScope()
@@ -154,8 +167,10 @@ fun TabLayout() {
             LazyColumn(
                 modifier = Modifier.fillMaxSize()
             ) {
-                items(15) {
-                    ListItem()
+                itemsIndexed(
+                    daysList.value
+                ) { _, item ->
+                    ListItem(item)
                 }
             }
         }
