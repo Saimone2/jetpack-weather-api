@@ -48,14 +48,19 @@ class MainActivity : ComponentActivity() {
                 )
                 Column {
                     MainCard(currentDay)
-                    TabLayout(daysList)
+                    TabLayout(daysList, currentDay)
                 }
             }
         }
     }
 }
 
-private fun getData(city: String, context: Context, daysList: MutableState<List<WeatherModel>>, currentDay: MutableState<WeatherModel>) {
+private fun getData(
+    city: String,
+    context: Context,
+    daysList: MutableState<List<WeatherModel>>,
+    currentDay: MutableState<WeatherModel>
+) {
     val url =
         "https://api.weatherapi.com/v1/forecast.json?key=${API_KEY}&q=${city}&days=3&aqi=no&alerts=no"
     val query = Volley.newRequestQueue(context)
@@ -92,15 +97,16 @@ private fun getWeatherByDays(response: String): List<WeatherModel> {
             "",
             item.getJSONObject("day").getJSONObject("condition").getString("text"),
             item.getJSONObject("day").getJSONObject("condition").getString("icon"),
-            item.getJSONObject("day").getString("maxtemp_c"),
-            item.getJSONObject("day").getString("mintemp_c"),
+            item.getJSONObject("day").getString("maxtemp_c").toFloat().toInt().toString() + "°C",
+            item.getJSONObject("day").getString("mintemp_c").toFloat().toInt().toString() + "°C",
             item.getJSONArray("hour").toString()
         )
         list.add(model)
     }
     list[0] = list[0].copy(
         time = mainObject.getJSONObject("current").getString("last_updated"),
-        currentTemp = mainObject.getJSONObject("current").getString("temp_c")
+        currentTemp = mainObject.getJSONObject("current").getString("temp_c").toFloat().toInt()
+            .toString() + "°C"
     )
     return list
 }

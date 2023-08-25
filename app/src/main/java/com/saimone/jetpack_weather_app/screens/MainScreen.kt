@@ -5,13 +5,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -40,6 +37,8 @@ import com.saimone.jetpack_weather_app.R
 import com.saimone.jetpack_weather_app.data.WeatherModel
 import com.saimone.jetpack_weather_app.ui.theme.TransparentBlue
 import kotlinx.coroutines.launch
+import org.json.JSONArray
+import org.json.JSONObject
 
 @Composable
 fun MainCard(currentDay: MutableState<WeatherModel>) {
@@ -81,7 +80,9 @@ fun MainCard(currentDay: MutableState<WeatherModel>) {
                     color = Color.White
                 )
                 Text(
-                    text = "${currentDay.value.currentTemp.toFloat().toInt()}°С",
+                    text = currentDay.value.currentTemp.ifEmpty {
+                        "${currentDay.value.maxTemp} / ${currentDay.value.minTemp}"
+                    },
                     style = TextStyle(fontSize = 65.sp),
                     color = Color.White
                 )
@@ -104,9 +105,7 @@ fun MainCard(currentDay: MutableState<WeatherModel>) {
                         )
                     }
                     Text(
-                        text = "${
-                            currentDay.value.maxTemp.toFloat().toInt()
-                        }°С / ${currentDay.value.minTemp.toFloat().toInt()}°С",
+                        text = currentDay.value.currentTemp.ifEmpty { "" },
                         style = TextStyle(fontSize = 16.sp),
                         color = Color.White
                     )
@@ -126,7 +125,7 @@ fun MainCard(currentDay: MutableState<WeatherModel>) {
 }
 
 @Composable
-fun TabLayout(daysList: MutableState<List<WeatherModel>>) {
+fun TabLayout(daysList: MutableState<List<WeatherModel>>, currentDay: MutableState<WeatherModel>) {
     val tabList = listOf("HOURS", "DAYS")
     val pagerState = rememberPagerState()
     val coroutineScope = rememberCoroutineScope()
@@ -163,16 +162,36 @@ fun TabLayout(daysList: MutableState<List<WeatherModel>>) {
         }
         HorizontalPager(
             count = tabList.size, state = pagerState, modifier = Modifier.weight(1.0f)
-        ) { _ ->
-            LazyColumn(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                itemsIndexed(
-                    daysList.value
-                ) { _, item ->
-                    ListItem(item)
-                }
+        ) { index ->
+            val list = when (index) {
+                0 -> getWeatherByHours(currentDay.value.hours)
+                1 -> daysList.value
+                else -> daysList.value
             }
+            MainList(list = list, currentDay = currentDay)
         }
     }
+}
+
+private fun getWeatherByHours(hours: String): List<WeatherModel> {
+    if (hours.isEmpty()) {
+        return listOf()
+    }
+    val hoursArray = JSONArray(hours)
+    val list = ArrayList<WeatherModel>()
+    for (i in 0 until hoursArray.length()) {
+        val item = hoursArray[i] as JSONObject
+        val model = WeatherModel(
+            "",
+            item.getString("time"),
+            item.getString("temp_c").toFloat().toInt().toString() + "°C",
+            item.getJSONObject("condition").getString("text"),
+            item.getJSONObject("condition").getString("icon"),
+            "",
+            "",
+            ""
+        )
+        list.add(model)
+    }
+    return list
 }
