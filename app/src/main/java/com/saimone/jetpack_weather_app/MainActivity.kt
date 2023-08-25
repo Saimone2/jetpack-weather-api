@@ -19,6 +19,7 @@ import com.android.volley.Request
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.saimone.jetpack_weather_app.data.WeatherModel
+import com.saimone.jetpack_weather_app.screens.DialogSearch
 import com.saimone.jetpack_weather_app.screens.MainCard
 import com.saimone.jetpack_weather_app.screens.TabLayout
 import com.saimone.jetpack_weather_app.ui.theme.JetpackweatherappTheme
@@ -31,13 +32,25 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             JetpackweatherappTheme {
+                val currentCity = remember {
+                    mutableStateOf("Kiev")
+                }
                 val daysList = remember {
                     mutableStateOf(listOf<WeatherModel>())
                 }
                 val currentDay = remember {
                     mutableStateOf(WeatherModel("", "", "0.0", "", "", "0.0", "0.0", ""))
                 }
-                getData("Kiev", this, daysList, currentDay)
+                val dialogState = remember {
+                    mutableStateOf(false)
+                }
+                if (dialogState.value) {
+                    DialogSearch(dialogState, onSubmit = {
+                        currentCity.value = it
+                        getData(currentCity.value, this@MainActivity, daysList, currentDay)
+                    })
+                }
+                getData(currentCity.value, this, daysList, currentDay)
                 Image(
                     painter = painterResource(id = R.drawable.sky),
                     contentDescription = "background",
@@ -47,7 +60,13 @@ class MainActivity : ComponentActivity() {
                     contentScale = ContentScale.FillBounds
                 )
                 Column {
-                    MainCard(currentDay)
+                    MainCard(currentDay,
+                        onClickSync = {
+                            getData(currentCity.value, this@MainActivity, daysList, currentDay)
+                        },
+                        onClickSearch = {
+                            dialogState.value = true
+                        })
                     TabLayout(daysList, currentDay)
                 }
             }
