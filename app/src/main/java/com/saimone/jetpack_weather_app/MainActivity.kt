@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.MutableState
@@ -32,6 +33,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             JetpackweatherappTheme {
+                val isDarkTheme = isSystemInDarkTheme()
+
                 val currentCity = remember {
                     mutableStateOf("Kiev")
                 }
@@ -51,12 +54,18 @@ class MainActivity : ComponentActivity() {
                     })
                 }
                 getData(currentCity.value, this, daysList, currentDay)
+
+                val background = if (isDarkTheme) {
+                    painterResource(id = R.drawable.dark_sky)
+                } else {
+                    painterResource(id = R.drawable.summer_clouds)
+                }
                 Image(
-                    painter = painterResource(id = R.drawable.sky),
+                    painter = background,
                     contentDescription = "background",
                     modifier = Modifier
                         .fillMaxSize()
-                        .alpha(0.7f),
+                        .alpha(0.9f),
                     contentScale = ContentScale.FillBounds
                 )
                 Column {

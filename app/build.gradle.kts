@@ -52,6 +52,7 @@ android {
 dependencies {
     implementation("com.google.accompanist:accompanist-pager:0.32.0")
     runtimeOnly("com.google.accompanist:accompanist-pager-indicators:0.32.0")
+    implementation("androidx.compose.ui:ui-text-google-fonts:1.5.0")
     implementation("androidx.core:core-ktx:1.10.1")
     implementation("com.android.volley:volley:1.2.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")

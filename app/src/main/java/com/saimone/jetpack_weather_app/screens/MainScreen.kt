@@ -28,6 +28,10 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.googlefonts.Font
+import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -35,25 +39,44 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import com.saimone.jetpack_weather_app.R
 import com.saimone.jetpack_weather_app.data.WeatherModel
-import com.saimone.jetpack_weather_app.ui.theme.TransparentBlue
+import com.saimone.jetpack_weather_app.ui.theme.Blue40
+import com.saimone.jetpack_weather_app.ui.theme.TransparentBlue40
 import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONObject
 
 @Composable
-fun MainCard(currentDay: MutableState<WeatherModel>, onClickSync: () -> Unit, onClickSearch: () -> Unit) {
+fun MainCard(
+    currentDay: MutableState<WeatherModel>,
+    onClickSync: () -> Unit,
+    onClickSearch: () -> Unit
+) {
+    val provider = GoogleFont.Provider(
+        providerAuthority = "com.google.android.gms.fonts",
+        providerPackage = "com.google.android.gms",
+        certificates = R.array.com_google_android_gms_fonts_certs
+    )
+    val fontName = GoogleFont("Signika Negative")
+
+    val fontFamily = FontFamily(
+        Font(googleFont = fontName, fontProvider = provider)
+    )
     Column(
-        modifier = Modifier.padding(5.dp)
+        modifier = Modifier
+            .padding(5.dp)
+            .fillMaxWidth()
     ) {
         Card(
             modifier = Modifier
                 .shadow(elevation = 0.dp)
                 .fillMaxWidth(),
-            colors = CardDefaults.cardColors(TransparentBlue),
-            shape = RoundedCornerShape(5.dp)
+            colors = CardDefaults.cardColors(TransparentBlue40),
+            shape = RoundedCornerShape(8.dp)
         ) {
             Column(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Row(
@@ -61,60 +84,65 @@ fun MainCard(currentDay: MutableState<WeatherModel>, onClickSync: () -> Unit, on
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        modifier = Modifier.padding(top = 8.dp, start = 8.dp),
+                        modifier = Modifier.padding(top = 10.dp, start = 8.dp),
                         text = currentDay.value.time,
-                        style = TextStyle(fontSize = 15.sp),
+                        style = TextStyle(
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = fontFamily
+                        ),
                         color = Color.White
                     )
                     AsyncImage(
                         model = "https:" + currentDay.value.icon,
-                        contentDescription = "image1",
+                        contentDescription = "Weather Icon",
                         modifier = Modifier
-                            .size(35.dp)
-                            .padding(top = 3.dp, end = 8.dp)
+                            .size(45.dp)
                     )
                 }
                 Text(
                     text = currentDay.value.city,
-                    style = TextStyle(fontSize = 24.sp),
-                    color = Color.White
+                    style = TextStyle(fontSize = 24.sp, fontFamily = fontFamily),
+                    color = Color.White,
                 )
-                Text(
-                    text = currentDay.value.currentTemp.ifEmpty {
-                        "${currentDay.value.maxTemp} / ${currentDay.value.minTemp}"
-                    },
-                    style = TextStyle(fontSize = 65.sp),
-                    color = Color.White
-                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(80.dp),
+                    contentAlignment = Alignment.TopCenter
+                ) {
+                    Text(
+                        text = currentDay.value.currentTemp.ifEmpty {
+                            "${currentDay.value.maxTemp} / ${currentDay.value.minTemp}"
+                        },
+                        style = if (currentDay.value.currentTemp.isEmpty()) {
+                            TextStyle(fontSize = 54.sp, fontFamily = fontFamily)
+                        } else {
+                            TextStyle(fontSize = 66.sp, fontFamily = fontFamily)
+                        },
+                        color = Color.White,
+                    )
+                }
                 Text(
                     text = currentDay.value.condition,
-                    style = TextStyle(fontSize = 16.sp),
+                    style = TextStyle(fontSize = 20.sp, fontFamily = fontFamily),
                     color = Color.White
                 )
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    IconButton(onClick = {
-                        onClickSearch.invoke()
-                    }) {
+                    IconButton(onClick = onClickSearch) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_search),
-                            contentDescription = "image2",
+                            contentDescription = "Search Icon",
                             tint = Color.White
                         )
                     }
-                    Text(
-                        text = currentDay.value.currentTemp.ifEmpty { "" },
-                        style = TextStyle(fontSize = 16.sp),
-                        color = Color.White
-                    )
-                    IconButton(onClick = {
-                        onClickSync.invoke()
-                    }) {
+                    IconButton(onClick = onClickSync) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_sync),
-                            contentDescription = "image3",
+                            contentDescription = "Sync Icon",
                             tint = Color.White
                         )
                     }
@@ -148,7 +176,7 @@ fun TabLayout(daysList: MutableState<List<WeatherModel>>, currentDay: MutableSta
                 )
             }) {
             tabList.forEachIndexed { index, title ->
-                Tab(modifier = Modifier.background(TransparentBlue),
+                Tab(modifier = Modifier.background(Blue40),
                     selected = pagerState.currentPage == index,
                     onClick = {
                         coroutineScope.launch {
@@ -164,7 +192,7 @@ fun TabLayout(daysList: MutableState<List<WeatherModel>>, currentDay: MutableSta
             count = tabList.size, state = pagerState, modifier = Modifier.weight(1.0f)
         ) { index ->
             val list = when (index) {
-                0 -> getWeatherByHours(currentDay.value.hours)
+                0 -> getWeatherByHours(currentDay.value.hours, currentDay)
                 1 -> daysList.value
                 else -> daysList.value
             }
@@ -173,7 +201,7 @@ fun TabLayout(daysList: MutableState<List<WeatherModel>>, currentDay: MutableSta
     }
 }
 
-private fun getWeatherByHours(hours: String): List<WeatherModel> {
+private fun getWeatherByHours(hours: String, currentDay: MutableState<WeatherModel>): List<WeatherModel> {
     if (hours.isEmpty()) {
         return listOf()
     }
@@ -181,6 +209,13 @@ private fun getWeatherByHours(hours: String): List<WeatherModel> {
     val list = ArrayList<WeatherModel>()
     for (i in 0 until hoursArray.length()) {
         val item = hoursArray[i] as JSONObject
+
+        val currentTime = currentDay.value.time.substringBefore(":") + ":00"
+
+        if(item.getString("time") == currentTime) {
+            list.clear()
+            continue
+        }
         val model = WeatherModel(
             "",
             item.getString("time"),

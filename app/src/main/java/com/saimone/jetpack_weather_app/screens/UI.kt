@@ -26,11 +26,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.googlefonts.Font
+import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.saimone.jetpack_weather_app.R
 import com.saimone.jetpack_weather_app.data.WeatherModel
-import com.saimone.jetpack_weather_app.ui.theme.TransparentBlue
+import com.saimone.jetpack_weather_app.ui.theme.TransparentBlue40
 
 @Composable
 fun MainList(list: List<WeatherModel>, currentDay: MutableState<WeatherModel>) {
@@ -47,6 +51,16 @@ fun MainList(list: List<WeatherModel>, currentDay: MutableState<WeatherModel>) {
 
 @Composable
 fun ListItem(item: WeatherModel, currentDay: MutableState<WeatherModel>) {
+    val provider = GoogleFont.Provider(
+        providerAuthority = "com.google.android.gms.fonts",
+        providerPackage = "com.google.android.gms",
+        certificates = R.array.com_google_android_gms_fonts_certs
+    )
+    val fontName = GoogleFont("Signika Negative")
+
+    val fontFamily = FontFamily(
+        Font(googleFont = fontName, fontProvider = provider)
+    )
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -56,7 +70,7 @@ fun ListItem(item: WeatherModel, currentDay: MutableState<WeatherModel>) {
                     return@clickable
                 currentDay.value = item
             },
-        colors = CardDefaults.cardColors(TransparentBlue),
+        colors = CardDefaults.cardColors(TransparentBlue40),
         shape = RoundedCornerShape(5.dp)
     ) {
         Row(
@@ -69,11 +83,13 @@ fun ListItem(item: WeatherModel, currentDay: MutableState<WeatherModel>) {
             ) {
                 Text(
                     text = item.time,
-                    color = Color.White
+                    color = Color.White,
+                    fontFamily = fontFamily
                 )
                 Text(
                     text = item.condition,
-                    color = Color.White
+                    color = Color.White,
+                    fontFamily = fontFamily
                 )
             }
             Text(
@@ -81,13 +97,14 @@ fun ListItem(item: WeatherModel, currentDay: MutableState<WeatherModel>) {
                     "${item.maxTemp} / ${item.minTemp}"
                 },
                 color = Color.White,
-                style = TextStyle(fontSize = 25.sp)
+                style = TextStyle(fontSize = 25.sp),
+                fontFamily = fontFamily
             )
             AsyncImage(
                 model = "https:${item.icon}",
-                contentDescription = "image1",
+                contentDescription = "Weather Image",
                 modifier = Modifier
-                    .size(35.dp)
+                    .size(40.dp)
                     .padding(end = 8.dp)
             )
         }

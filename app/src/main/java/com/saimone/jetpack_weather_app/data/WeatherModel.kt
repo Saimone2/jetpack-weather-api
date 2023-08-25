@@ -1,6 +1,6 @@
 package com.saimone.jetpack_weather_app.data
 
-data class WeatherModel (
+data class WeatherModel(
     val city: String,
     val time: String,
     val currentTemp: String,
