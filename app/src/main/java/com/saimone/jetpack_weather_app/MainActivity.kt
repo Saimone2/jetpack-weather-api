@@ -26,7 +26,7 @@ import com.saimone.jetpack_weather_app.screens.TabLayout
 import com.saimone.jetpack_weather_app.ui.theme.JetpackweatherappTheme
 import org.json.JSONObject
 
-const val API_KEY = "a624625638244d37b25103525232208"
+const val API_KEY = "PUT YOUR OWN API KEY HERE"
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

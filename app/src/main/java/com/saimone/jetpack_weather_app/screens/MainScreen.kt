@@ -1,6 +1,7 @@
 package com.saimone.jetpack_weather_app.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,7 +41,9 @@ import com.google.accompanist.pager.rememberPagerState
 import com.saimone.jetpack_weather_app.R
 import com.saimone.jetpack_weather_app.data.WeatherModel
 import com.saimone.jetpack_weather_app.ui.theme.Blue40
+import com.saimone.jetpack_weather_app.ui.theme.Blue80
 import com.saimone.jetpack_weather_app.ui.theme.TransparentBlue40
+import com.saimone.jetpack_weather_app.ui.theme.TransparentBlue80
 import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONObject
@@ -70,7 +73,7 @@ fun MainCard(
             modifier = Modifier
                 .shadow(elevation = 0.dp)
                 .fillMaxWidth(),
-            colors = CardDefaults.cardColors(TransparentBlue40),
+            colors = CardDefaults.cardColors(if (isSystemInDarkTheme()) TransparentBlue80 else TransparentBlue40),
             shape = RoundedCornerShape(8.dp)
         ) {
             Column(
@@ -109,17 +112,20 @@ fun MainCard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(80.dp),
-                    contentAlignment = Alignment.TopCenter
+                    contentAlignment = Alignment.Center // Center content vertically
                 ) {
                     Text(
                         text = currentDay.value.currentTemp.ifEmpty {
                             "${currentDay.value.maxTemp} / ${currentDay.value.minTemp}"
                         },
-                        style = if (currentDay.value.currentTemp.isEmpty()) {
-                            TextStyle(fontSize = 54.sp, fontFamily = fontFamily)
-                        } else {
-                            TextStyle(fontSize = 66.sp, fontFamily = fontFamily)
-                        },
+                        style = TextStyle(
+                            fontSize = if (currentDay.value.currentTemp.isEmpty()) {
+                                54.sp
+                            } else {
+                                66.sp
+                            },
+                            fontFamily = FontFamily.Default
+                        ),
                         color = Color.White,
                     )
                 }
@@ -176,7 +182,7 @@ fun TabLayout(daysList: MutableState<List<WeatherModel>>, currentDay: MutableSta
                 )
             }) {
             tabList.forEachIndexed { index, title ->
-                Tab(modifier = Modifier.background(Blue40),
+                Tab(modifier = Modifier.background(if (isSystemInDarkTheme()) Blue80 else Blue40),
                     selected = pagerState.currentPage == index,
                     onClick = {
                         coroutineScope.launch {
