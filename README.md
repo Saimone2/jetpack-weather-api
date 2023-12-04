@@ -1,4 +1,4 @@
-# jetpack-weather-api
+# Weather App
 
 Jetpack Weather App is an Android application developed in Kotlin that allows users to check the weather forecast for different cities. The app fetches weather data from the WeatherAPI service using the provided API key. Users can view the current weather conditions as well as the forecast for the next few days.
 
