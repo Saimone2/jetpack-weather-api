@@ -112,7 +112,7 @@ fun MainCard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(80.dp),
-                    contentAlignment = Alignment.Center // Center content vertically
+                    contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = currentDay.value.currentTemp.ifEmpty {
@@ -207,7 +207,10 @@ fun TabLayout(daysList: MutableState<List<WeatherModel>>, currentDay: MutableSta
     }
 }
 
-private fun getWeatherByHours(hours: String, currentDay: MutableState<WeatherModel>): List<WeatherModel> {
+private fun getWeatherByHours(
+    hours: String,
+    currentDay: MutableState<WeatherModel>
+): List<WeatherModel> {
     if (hours.isEmpty()) {
         return listOf()
     }
@@ -218,7 +221,7 @@ private fun getWeatherByHours(hours: String, currentDay: MutableState<WeatherMod
 
         val currentTime = currentDay.value.time.substringBefore(":") + ":00"
 
-        if(item.getString("time") == currentTime) {
+        if (item.getString("time") == currentTime) {
             list.clear()
             continue
         }

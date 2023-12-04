@@ -36,7 +36,7 @@ class MainActivity : ComponentActivity() {
                 val isDarkTheme = isSystemInDarkTheme()
 
                 val currentCity = remember {
-                    mutableStateOf("Kiev")
+                    mutableStateOf("Kyiv")
                 }
                 val daysList = remember {
                     mutableStateOf(listOf<WeatherModel>())

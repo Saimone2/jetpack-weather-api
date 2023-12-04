@@ -16,10 +16,10 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -125,7 +125,7 @@ fun DialogSearch(dialogState: MutableState<Boolean>, onSubmit: (String) -> Unit)
         mutableStateOf("")
     }
     AlertDialog(
-        containerColor = if(isSystemInDarkTheme()) OpaqueBlue80 else OpaqueBlue40,
+        containerColor = if (isSystemInDarkTheme()) OpaqueBlue80 else OpaqueBlue40,
         onDismissRequest = {
             dialogState.value = false
         },
@@ -174,7 +174,9 @@ fun DialogSearch(dialogState: MutableState<Boolean>, onSubmit: (String) -> Unit)
                     fontFamily = fontFamily
                 )
                 TextField(
-                    colors = TextFieldDefaults.outlinedTextFieldColors(Color.White),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = Color.White,
+                    ),
                     value = dialogText.value,
                     textStyle = TextStyle(
                         fontFamily = fontFamily,
